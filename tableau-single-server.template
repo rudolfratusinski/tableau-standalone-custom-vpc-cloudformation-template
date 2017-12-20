@@ -19,6 +19,16 @@
             "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
+        "SubnetRef": {
+            "ConstraintDescription": "The ref of a subnet.",
+            "Description": "Choose existing Subnet ref",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "VpcId": {
+            "ConstraintDescription": "The id of an existing VPC.",
+            "Description": "Choose existing VPC id",
+            "Type": "AWS::EC2::VPC::Id"
+        },
         "RegCity": {
             "Type": "String"
         },
@@ -82,6 +92,8 @@
                     },
                     "Parameters": [
                         "KeyPairName",
+                        "SubnetRef",
+                        "VpcId",
                         "ResourceAvailabilityZone",
                         "SourceCIDR"
                     ]
@@ -119,6 +131,12 @@
             "ParameterLabels": {
                 "KeyPairName": {
                     "default": "Key Pair Name"
+                },
+                "SubnetRef": {
+                    "default": "Subnet Ref"
+                },
+                "VpcId": {
+                    "default": "VPC Id"
                 },
                 "ResourceAvailabilityZone": {
                     "default": "Target Availability Zone"
@@ -228,7 +246,7 @@
                 "InstallationExecutable": "Setup-Server-x64.exe"
             },
             "MachineConfiguration": {
-                "InstanceType": "m4.4xlarge",
+                "InstanceType": "m4.xlarge",
                 "SystemVolumeSize": 50,
                 "DataVolumeSize": 100,
                 "WindowsVersion": "WS2012R2"
@@ -249,6 +267,9 @@
         "InstanceSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
+                "VpcId": {
+                    "Ref": "VpcId"
+                },
                 "GroupDescription": "Enable RDP",
                 "SecurityGroupIngress": [
                     {
@@ -489,13 +510,16 @@
                         }
                     }
                 ],
-                "SecurityGroups": [
+                "SecurityGroupIds": [
                     {
                         "Ref": "InstanceSecurityGroup"
                     }
                 ],
                 "KeyName": {
                     "Ref": "KeyPairName"
+                },
+                "SubnetId": {
+                    "Ref": "SubnetRef"
                 },
                 "UserData": {
                     "Fn::Base64": {
